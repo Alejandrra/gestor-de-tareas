@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tareas</title>
+    <!-- Enlace a Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'lista_tareas' %}">Gestión de Tareas</a>
+        <div class="navbar-nav ml-auto">
+            {% if user.is_authenticated %}
+                <a class="nav-item nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
+            {% else %}
+                <a class="nav-item nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+                <a class="nav-item nav-link" href="{% url 'registro' %}">Registrarse</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Lista de Tareas</h1>
+
+        <!-- Filtros -->
+        <div class="mb-3">
+            <a href="?filtro=todas" class="btn btn-outline-primary {% if filtro == 'todas' %}active{% endif %}">Todas</a>
+            <a href="?filtro=pendientes" class="btn btn-outline-warning {% if filtro == 'pendientes' %}active{% endif %}">Pendientes</a>
+            <a href="?filtro=completadas" class="btn btn-outline-success {% if filtro == 'completadas' %}active{% endif %}">Completadas</a>
+        </div>
+
+        <!-- Formulario para agregar una nueva tarea -->
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col-md-4">
+                    <input type="text" name="titulo" class="form-control" placeholder="Título de la tarea" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="descripcion" class="form-control" placeholder="Descripción de la tarea">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="fecha_vencimiento" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success">Agregar Tarea</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Lista de tareas -->
+        <ul class="list-group">
+            {% for tarea in tareas %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ tarea.titulo }}</strong> - {{ tarea.descripcion }}
+                        {% if tarea.estado %}
+                            <span class="badge badge-success ml-2">Completada</span>
+                        {% else %}
+                            <span class="badge badge-warning ml-2">Pendiente</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if not tarea.estado %}
+                            <a href="{% url 'completar_tarea' tarea.id %}" class="btn btn-sm btn-primary mr-2">Completar</a>
+                        {% endif %}
+                        <a href="{% url 'eliminar_tarea' tarea.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No hay tareas disponibles.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Scripts de Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
